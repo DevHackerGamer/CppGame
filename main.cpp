@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "Objects.cpp"
+#include "Objects.h"
 #include <string>
 
 #define LEFT 0

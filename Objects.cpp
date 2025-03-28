@@ -42,7 +42,13 @@ void Board::print_board()
 {
 
     std::cout << "Board: " << std::endl;
-    std::cout << "-------------------------" << std::endl;
+    std::cout << "-";
+    for(int i=0; i < this->board.size()-1; i++){
+        for(int j=0; j < 8; j++){
+            std::cout << "-" ;
+        }
+    }
+    std::cout << std::endl;
 
     for (int i = 0; i < this->board.size(); i++)
     {
@@ -58,7 +64,13 @@ void Board::print_board()
         std::cout << std::endl;
     }
 
-    std::cout << "-------------------------" << std::endl;
+    std::cout << "-";
+    for(int i=0; i < this->board.size()-1; i++){
+        for(int j=0; j < 8; j++){
+            std::cout << "-" ;
+        }
+    }
+    std::cout << std::endl;
 }
 
 // Check if the move is valid
@@ -178,6 +190,7 @@ void Board::checkIfWin(std::vector<std::vector<int>> &board){
         for (int j = 0; j < board[0].size(); j++) {
             if(board[i][j] == 2){
                 std::cout << "You Win!" << std::endl;
+                print_board();
                 throw std::runtime_error("You Win!");
             }
         }
@@ -231,6 +244,7 @@ void Board::move(int direction)
 
         elevate(this->board, UP);
 
+
         checkIfWin(this->board);
         update_board();
         break;
@@ -244,7 +258,7 @@ void Board::move(int direction)
 
         elevate(this->board, DOWN);
 
-        checkIfWin(this->board);
+
         update_board();
         break;
 
