@@ -23,23 +23,34 @@ int main(){
     board.print_board();
     std::string userInput;
     std::getline(std::cin, userInput);
+    int maxMoves=0;
+
     while(userInput != "exit"){
+
+        if(maxMoves==1000){
+            std::cout << "Maximum moves reached! Lose!" << std::endl;
+            break;
+        }
 
         if(userInput == "left"){
             board.move(LEFT);
             board.print_board();
+            maxMoves++;
         }
         else if(userInput == "right"){
             board.move(RIGHT);
             board.print_board();
+            maxMoves++;
         }
         else if(userInput == "up"){
             board.move(UP);
             board.print_board();
+            maxMoves++;
         }
         else if(userInput == "down"){
             board.move(DOWN);
             board.print_board();
+            maxMoves++;
         }
         else{
             std::cout << "Invalid input" << std::endl;

@@ -10,30 +10,79 @@ class Board
 {
 public:
     std::vector<std::vector<int>> board;
-    Board(size_t size);
+    Board(int board_max, size_t size);
+    int size;
+    int board_type;
+    Board();
     void print_board();
     bool canDo(int obj, int obj2);
     void slide(std::vector<int> &list, int direction);
     void elevate(std::vector<std::vector<int>> &board, int direction);
     void check_for_merges(std::vector<std::vector<int>> &board, int direction);
     void checkIfWin(std::vector<std::vector<int>> &board);
+    bool checkIfWin();
     void move(int direction);
     void update_board();
+    bool operator!=(const Board& other) const;
+    bool operator<(const Board& other) const;
+    bool operator==(const Board& other) const;
     ~Board();
 };
 
 // Constructor
-Board::Board(size_t size)
+Board::Board(int board_max, size_t size)
 {
     srand(time(0)); // Seed the random number generator
     std::vector<std::vector<int>> board(size, std::vector<int>(size, 0));
     this->board = board;
     
-    // set two values (adjacent) in the middle of the board to 256 for init state
-    int middle_row = this->board.size() / 2;
-    int middle_col = this->board[0].size() / 2;
-    this->board[middle_row][middle_col] = 512;
-    this->board[middle_row+1][middle_col] = 512;
+    // // set two values (adjacent) in the middle of the board to 256 for init state
+    // int middle_row = this->board.size() / 2;
+    // int middle_col = this->board[0].size() / 2;
+    // this->board[middle_row][middle_col] = board_max;
+    // this->board[middle_row][middle_col + 1] = board_max;
+
+    // find a random empty square
+    int row = rand() % this->board.size();
+    int col = rand() % this->board[0].size();
+
+    this->board[row][col] = board_max;
+
+    int row2 = rand() % this->board.size();
+    int col2 = rand() % this->board[0].size();
+
+    // make sure the two squares are not the same
+    while (row == row2 && col == col2)
+    {
+        row2 = rand() % this->board.size();
+        col2 = rand() % this->board[0].size();
+    }
+    this->board[row2][col2] = board_max;
+    // set the value
+
+    this->board_type = board_max;
+}
+
+Board::Board() {
+    // Default constructor
+    this->board_type = 0;
+    this->size = 0;
+}
+
+
+bool Board::operator!=(const Board& other) const {
+    return this->board != other.board; // Compare the board matrices
+}
+
+bool Board::operator<(const Board& other) const {
+    return this->board < other.board; // Lexicographical comparison of the board matrices
+}
+
+// Operator overload for equality check
+// This function checks if two Board objects are equal by comparing their board matrices
+
+bool Board::operator==(const Board& other) const {
+    return this->board == other.board; // Compare the board matrices
 }
 
 // Print board for debug
@@ -190,11 +239,20 @@ void Board::checkIfWin(std::vector<std::vector<int>> &board){
         for (int j = 0; j < board[0].size(); j++) {
             if(board[i][j] == 2){
                 std::cout << "You Win!" << std::endl;
-                print_board();
                 throw std::runtime_error("You Win!");
             }
         }
     }
+}
+bool Board::checkIfWin(){
+    for (int i = 0; i < this->board.size(); i++) {
+        for (int j = 0; j < this->board[0].size(); j++) {
+            if(this->board[i][j] == 2){
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // Move everything to the (arg) direction
@@ -215,7 +273,6 @@ void Board::move(int direction)
         for(auto& row : this->board){
             slide(row, LEFT);
         }
-        checkIfWin(this->board);
         update_board();
         break;
     case RIGHT:
@@ -232,7 +289,6 @@ void Board::move(int direction)
             slide(row, RIGHT);
         }
 
-        checkIfWin(this->board);
         update_board();
         break;
     case UP:
@@ -245,7 +301,6 @@ void Board::move(int direction)
         elevate(this->board, UP);
 
 
-        checkIfWin(this->board);
         update_board();
         break;
     case DOWN:
@@ -303,7 +358,12 @@ void Board::update_board()
     }
 
     // set the value
-    std::vector<int> values = {256, 128, 64, 32};
+    std::vector<int> values (3);
+    
+    values[0] = this->board_type/2;
+    values[1] = values[0] / 2;
+    values[2] = values[1] / 2;
+
     int value = values[rand() % values.size()];
     this->board[row][col] = value;
 }

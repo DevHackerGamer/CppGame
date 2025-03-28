@@ -13,15 +13,22 @@ class Board
 {
 public:
     std::vector<std::vector<int>> board;
-    Board(size_t size);
+    int board_type;
+    int size;
+    Board();
+    Board(int max, size_t size);
     void print_board();
     bool canDo(int obj, int obj2);
     void slide(std::vector<int> &list, int direction);
     void elevate(std::vector<std::vector<int>> &board, int direction);
     void check_for_merges(std::vector<std::vector<int>> &board, int direction);
     void checkIfWin(std::vector<std::vector<int>> &board);
+    bool checkIfWin();
     void move(int direction);
     void update_board();
+    bool operator==(const Board& other) const;
+    bool operator<(const Board& other) const;
+    bool operator!=(const Board& other) const;
     ~Board();
 };
 
