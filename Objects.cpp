@@ -8,11 +8,9 @@
 
 class Board
 {
-private:
-    /* data */
-    std::vector<std::vector<int>> board;
 public:
-    Board();
+    std::vector<std::vector<int>> board;
+    Board(size_t size);
     void print_board();
     bool canDo(int obj, int obj2);
     void slide(std::vector<int> &list, int direction);
@@ -24,31 +22,42 @@ public:
 };
 
 // Constructor
-Board::Board(/* args */)
+Board::Board(size_t size)
 {
     srand(time(0)); // Seed the random number generator
-    std::vector<std::vector<int>> board(4, std::vector<int>(4, 0));
+    std::vector<std::vector<int>> board(size, std::vector<int>(size, 0));
     this->board = board;
     
     // set two values (adjacent) in the middle of the board to 256 for init state
     int middle_row = this->board.size() / 2;
     int middle_col = this->board[0].size() / 2;
     this->board[middle_row][middle_col] = 512;
-    this->board[middle_row][middle_col - 1] = 512;
+    this->board[middle_row+1][middle_col] = 512;
 }
 
 // Print board for debug
 
 void Board::print_board()
 {
+
+    std::cout << "Board: " << std::endl;
+    std::cout << "-------------------------" << std::endl;
+
     for (int i = 0; i < this->board.size(); i++)
     {
         for (int j = 0; j < this->board[0].size(); j++)
         {
-            std::cout << this->board[i][j] << " ";
+            if(this->board[i][j] == 0){
+                std::cout << "-\t";
+            }
+            else{
+                std::cout << this->board[i][j] << "\t";
+            }
         }
         std::cout << std::endl;
     }
+
+    std::cout << "-------------------------" << std::endl;
 }
 
 // Check if the move is valid
@@ -178,6 +187,10 @@ void Board::move(int direction)
         // check for merges
         check_for_merges(this->board, LEFT);
 
+        for(auto& row : this->board){
+            slide(row, LEFT);
+        }
+
         update_board();
         break;
     case RIGHT:
@@ -187,7 +200,12 @@ void Board::move(int direction)
             slide(row, RIGHT);
         }
 
+        // check for merges
         check_for_merges(this->board, RIGHT);
+
+        for(auto& row : this->board){
+            slide(row, RIGHT);
+        }
 
         update_board();
         break;
@@ -198,6 +216,8 @@ void Board::move(int direction)
         // check for merges 
         check_for_merges(this->board, UP);
 
+        elevate(this->board, UP);
+
 
         update_board();
         break;
@@ -206,9 +226,11 @@ void Board::move(int direction)
         // move everything ALL THE WAY to the bottom
         elevate(this->board, DOWN);
 
-
         // check for merges 
         check_for_merges(this->board, DOWN);
+
+        elevate(this->board, DOWN);
+
 
         update_board();
         break;
@@ -236,8 +258,12 @@ void Board::update_board()
         }
         if (hasEmpty) break;
     }
-
-    if (!hasEmpty) return;
+    // if theres no empty square, the game ends player loses
+    if (!hasEmpty) {
+        std::cout << "Game Over" << std::endl;
+        // Set a flag or return a value to indicate the game has ended
+        throw std::runtime_error("Game Over");
+    }
 
 
     // find a random empty square
@@ -263,7 +289,6 @@ Board::~Board()
 }
 
 
-//Algorithm 1: using dfs to solve this reverse maths game, moves: LEFT, RIGHT, UP, DOWN
 
 
 
