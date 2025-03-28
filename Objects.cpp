@@ -16,6 +16,7 @@ public:
     void slide(std::vector<int> &list, int direction);
     void elevate(std::vector<std::vector<int>> &board, int direction);
     void check_for_merges(std::vector<std::vector<int>> &board, int direction);
+    void checkIfWin(std::vector<std::vector<int>> &board);
     void move(int direction);
     void update_board();
     ~Board();
@@ -172,6 +173,17 @@ void Board::check_for_merges(std::vector<std::vector<int>> &board, int direction
     }
 }
 
+void Board::checkIfWin(std::vector<std::vector<int>> &board){
+    for (int i = 0; i < board.size(); i++) {
+        for (int j = 0; j < board[0].size(); j++) {
+            if(board[i][j] == 2){
+                std::cout << "You Win!" << std::endl;
+                throw std::runtime_error("You Win!");
+            }
+        }
+    }
+}
+
 // Move everything to the (arg) direction
 
 void Board::move(int direction)
@@ -190,7 +202,7 @@ void Board::move(int direction)
         for(auto& row : this->board){
             slide(row, LEFT);
         }
-
+        checkIfWin(this->board);
         update_board();
         break;
     case RIGHT:
@@ -207,6 +219,7 @@ void Board::move(int direction)
             slide(row, RIGHT);
         }
 
+        checkIfWin(this->board);
         update_board();
         break;
     case UP:
@@ -218,7 +231,7 @@ void Board::move(int direction)
 
         elevate(this->board, UP);
 
-
+        checkIfWin(this->board);
         update_board();
         break;
     case DOWN:
@@ -231,7 +244,7 @@ void Board::move(int direction)
 
         elevate(this->board, DOWN);
 
-
+        checkIfWin(this->board);
         update_board();
         break;
 
