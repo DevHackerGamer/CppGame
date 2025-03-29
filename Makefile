@@ -1,27 +1,4 @@
-# #This is a comment
-# INC="./inc"
-# FLAGS=-I$(INC)
-# CFLAGS = -g -Wall
-# CC=gcc
-# CPP=g++
-	
-# #SOURCES=$(wildcard *.c)
-# OBJECTS=$(patsubst %.c, %, $(wildcard *.c)) $(patsubst %.cpp, %, $(wildcard *.cpp))
-
-
-# all: $(OBJECTS)
-# 	@echo 'objects are "$(OBJECTS)"'
-
-# %: %.c
-# 	$(CC) $(CFLAGS) $(OMPFLAGS) $< -o $@
-
-# %: %.cpp
-# 	$(CPP) $(CFLAGS) $(OMPFLAGS) $< -o $@
-	
-# clean:
-# 	rm -vf $(OBJECTS)
-
-
+# Makefile for C++ game project
 
 # Compiler
 CXX = g++
@@ -33,7 +10,7 @@ CXXFLAGS = -std=c++11
 TARGET = CppGame
 
 # Source files
-SRCS = main.cpp Objects.cpp
+SRCS = main.cpp Objects.cpp algs.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
