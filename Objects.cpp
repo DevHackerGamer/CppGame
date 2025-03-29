@@ -90,9 +90,8 @@ bool Board::operator==(const Board& other) const {
 void Board::print_board()
 {
 
-    std::cout << "Board: " << std::endl;
     std::cout << "-";
-    for(int i=0; i < this->board.size()-1; i++){
+    for(int i=0; i < this->board.size(); i++){
         for(int j=0; j < 8; j++){
             std::cout << "-" ;
         }
@@ -101,6 +100,7 @@ void Board::print_board()
 
     for (int i = 0; i < this->board.size(); i++)
     {
+        std::cout << "|  ";
         for (int j = 0; j < this->board[0].size(); j++)
         {
             if(this->board[i][j] == 0){
@@ -110,11 +110,12 @@ void Board::print_board()
                 std::cout << this->board[i][j] << "\t";
             }
         }
+        std::cout << "|";
         std::cout << std::endl;
     }
 
     std::cout << "-";
-    for(int i=0; i < this->board.size()-1; i++){
+    for(int i=0; i < this->board.size(); i++){
         for(int j=0; j < 8; j++){
             std::cout << "-" ;
         }
@@ -238,7 +239,6 @@ void Board::checkIfWin(std::vector<std::vector<int>> &board){
     for (int i = 0; i < board.size(); i++) {
         for (int j = 0; j < board[0].size(); j++) {
             if(board[i][j] == 2){
-                std::cout << "You Win!" << std::endl;
                 throw std::runtime_error("You Win!");
             }
         }
@@ -342,7 +342,6 @@ void Board::update_board()
     }
     // if theres no empty square, the game ends player loses
     if (!hasEmpty) {
-        std::cout << "Game Over" << std::endl;
         // Set a flag or return a value to indicate the game has ended
         throw std::runtime_error("Game Over");
     }

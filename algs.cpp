@@ -23,16 +23,7 @@ struct BoardHash {
     }
 };
 
-// Heuristic: Prefer states with more empty tiles
-// int heuristic(const std::vector<std::vector<int>>& board) {
-//     int empty_count = 0;
-//     for (const auto& row : board) {
-//         for (int cell : row) {
-//             if (cell == 0) empty_count++;
-//         }
-//     }
-//     return -empty_count; // More empty tiles is better
-// }
+
 
 // Heuristic: Prefer states with fewer `2`s
 int heuristic(const std::vector<std::vector<int>>& board) {
@@ -56,16 +47,18 @@ int heuristic(const std::vector<std::vector<int>>& board) {
 }
 
 // Generate new possible board states
-std::vector<Board> get_successors(Board& game) {
+std::vector<std::pair<Board, int>> get_successors(Board& game) {
     std::vector<Board> successors;
+    std::vector<std::pair<Board, int>> successors_direction;
     for (int direction = 0; direction < 4; ++direction) {
         Board newBoard = game; // Copy the current board
         newBoard.move(direction);
-        if (newBoard != game) { // Only add if the board changes
-            successors.push_back(newBoard);
+        if (newBoard != game) {
+            std::pair<Board, int> tmp = {newBoard, direction}; // Only add if the board changes
+            successors_direction.push_back(tmp);
         }
     }
-    return successors;
+    return successors_direction;
 }
 Board find_parent(const std::vector<std::pair<Board, Board>>& parent_list, const Board& child) {
     for (const auto& pair : parent_list) {
@@ -77,13 +70,13 @@ Board find_parent(const std::vector<std::pair<Board, Board>>& parent_list, const
 }
 
 // Greedy Best-First Search
-std::vector<Board> greedy_search(Board& game) {
+std::vector<std::pair<Board, int>> greedy_search(Board& game) {
 
     int moves = 0;
     std::queue<Board> queue;
-    std::vector<std::pair<Board, Board>> parent_list; // Track parent-child relationships
+    std::vector<std::tuple<Board, Board, int>> parent_list; // Track child, parent, and move
     std::unordered_set<Board, BoardHash> visited; // Track visited boards
-    parent_list.push_back({game, game}); // Initialize with the starting board
+    parent_list.push_back({game, game, -1}); // Initialize with the starting board
     visited.insert(game); // Mark the initial board as visited
     queue.push(game);
     
@@ -94,72 +87,51 @@ std::vector<Board> greedy_search(Board& game) {
         moves++;
 
         if (current.checkIfWin()) {
-            std::cout << "You Win!" << std::endl;
-
-            std::vector<Board> path;
+            std::vector<std::pair<Board, int>> path;
             Board temp = current;
             while (true) {
-                path.push_back(temp);
+
+                // Find the parent and the move that led to this board
+                auto it = std::find_if(parent_list.begin(), parent_list.end(),
+                                       [&temp](const std::tuple<Board, Board, int>& entry) {
+                                           return std::get<0>(entry) == temp; // Match the child board
+                                       });
+                if (it == parent_list.end()) {
+                    throw std::runtime_error("Parent not found");
+                }
+                Board parent = std::get<1>(*it);
+                int move = std::get<2>(*it);
+                path.push_back({temp, move}); // Add the current board to the path
                 if (temp == game) break; // Stop when we reach the starting board
-                temp = find_parent(parent_list, temp); // Backtrack to find the parent
+                temp = parent; // Backtrack to find the parent
             }
             std::reverse(path.begin(), path.end()); // Reverse the path to get the correct order
-            return path;
+            return path; // Return the path
         }
 
         // Check if we have reached the maximum number of moves
 
         if (moves >= 1000) {
-            std::cout << "Maximum moves reached! Lose!" << std::endl;
-            break;
+            throw std::runtime_error("Maximum moves reached");
         }
         // Generate successors
 
-        std::vector<Board> successors = get_successors(current);
-        // if(moves<=10){
-        //     std::cout << "Generated successors for current board:\n";
-        //     for (auto& successor : successors) {
-        //         std::cout << "Successor board:\n";
-        //         successor.print_board();
-        //     }
-        // }
-
-        // if moves == 10, print the path to current board
-        if (moves == 10) {
-            std::cout << "Path to current board:\n";
+        std::vector<std::pair<Board, int>> successors = get_successors(current);
         
-            // Reconstruct the path from the starting board to the current board
-            std::vector<Board> path;
-            Board temp = current;
-            while (true) {
-                path.push_back(temp);
-                if (temp == game) break; // Stop when we reach the starting board
-                temp = find_parent(parent_list, temp); // Backtrack to find the parent
-            }
-            std::reverse(path.begin(), path.end()); // Reverse the path to get the correct order
-        
-            // Print the reconstructed path
-            for (auto& board : path) {
-                board.print_board();
-                std::cout << "-------------------------\n";
-            }
-        }
-
-
         // order the successors by heuristic
-        std::sort(successors.begin(), successors.end(), [](const Board& a, const Board& b) {
-            return heuristic(a.board) < heuristic(b.board);
+        std::sort(successors.begin(), successors.end(), [](const std::pair<Board, int>& a, const std::pair<Board, int>& b) {
+            return heuristic(a.first.board) < heuristic(b.first.board);
         });
         // Add the successors to the queue
         for (const auto& successor : successors) {
-            if (visited.find(successor) == visited.end()) { // Check if not visited
-                parent_list.push_back({successor, current}); // Track the parent of this successor
-                visited.insert(successor); // Mark as visited
+            if (visited.find(successor.first) == visited.end()) { // Check if not visited
+                parent_list.push_back({successor.first, current, successor.second}); // Track the parent of this successor
+                visited.insert(successor.first); // Mark as visited
             }
         }
         //add the best successor to the queue
         if (!successors.empty()) {
-            queue.push(successors[0]); // Push the best successor to the queue
+            queue.push(successors[0].first); // Push the best successor to the queue
         }
 
     }

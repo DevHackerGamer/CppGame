@@ -7,8 +7,9 @@
 
 // Function prototypes
 int heuristic(const std::vector<std::vector<int>>& board);
-std::vector<Board> get_successors(Board& game);
-std::vector<Board> greedy_search(Board& game); // Greedy Best-First Search
+std::vector<std::pair<Board, int>> get_successors(Board& game);
+std::vector<std::pair<Board, int>> greedy_search(Board& game); // Greedy Best-First Search
 std::vector<Board> a_star(Board& game);
+
 
 #endif // ALGS_H
