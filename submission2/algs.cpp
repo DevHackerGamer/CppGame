@@ -137,8 +137,23 @@ std::vector<std::pair<Board, int>> greedy_search(Board& game) {
     }
     return {};
 }
-
-// A* Search
-std::vector<Board> a_star(Board& game) {
-    return std::vector<Board>(); // Placeholder for A* search implementation
+// randomMove Search
+std::vector<std::pair<Board, int>> randomMove(Board& game) {
+    std::vector<std::pair<Board, int>> path;
+    try {
+        while (true) {
+            int direction = rand() % 4; // Random direction: 0 (LEFT), 1 (RIGHT), 2 (UP), 3 (DOWN)
+            game.move(direction);
+            path.push_back({game, direction}); // Add the current board state and move to the path
+        }
+    } catch (const std::runtime_error& e) {
+        if (std::string(e.what()) == "Game Over") {
+            // Game over, return the path generated so far
+            return path;
+        } else {
+            // Re-throw other exceptions
+            throw;
+        }
+    }
+    return path;
 }
