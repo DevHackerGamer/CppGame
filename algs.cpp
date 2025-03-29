@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "algs.h"
 
+using namespace std;
 
 struct BoardHash {
     std::size_t operator()(const Board& board) const {
@@ -166,7 +167,50 @@ std::vector<Board> greedy_search(Board& game) {
     return {};
 }
 
-// A* Search
-std::vector<Board> a_star(Board& game) {
-    return std::vector<Board>(); // Placeholder for A* search implementation
+// randomMove Search
+vector<Board> randomMove(Board& game) {
+    vector<Board> path;
+    unordered_set<Board, BoardHash> visited; // Track visited states
+    Board current = game;
+    visited.insert(current); // Mark the current board as visited
+    int moveAttempts = 0; // Track moves
+
+    for (int i = 0; i < 1000; i++) {
+        if (current.checkIfWin()) {
+            cout << "You win! :)" << endl;
+            path.push_back(current);
+            return path;
+        }
+        //Look for valid moves before(early break)
+        vector<Board> successors = get_successors(current);
+        
+        if (successors.empty()) {
+            cout << "No valid moves left. Game over!" << endl;
+            break;
+        }
+
+        // Pick a random valid move that hasn't been visited
+        Board randMove;
+        vector<int> moves = {0,1,2,3};
+        random_shuffle(moves.begin(),moves.end());
+        bool moved = false;
+        for (int direction:moves) { // Try a few times to get an unvisited move
+            Board temp = current;
+            temp.move(direction);{
+                if(temp!=current&&visited.find(temp)==visited.end()){
+                    path.push_back(temp);
+                    visited.insert(temp);
+                    current = temp;
+                    moveAttempts++;
+                    moved=true;
+                }
+            }
+        }
+        if (!moved) {
+            cout << "All possible moves lead to already visited states. Stopping." << endl;
+            break;
+        }
+    }
+    cout << "Maximum number of moves reached. You lose. :(" << endl;
+    return path;
 }

@@ -9,6 +9,6 @@
 int heuristic(const std::vector<std::vector<int>>& board);
 std::vector<Board> get_successors(Board& game);
 std::vector<Board> greedy_search(Board& game); // Greedy Best-First Search
-std::vector<Board> a_star(Board& game);
+std::vector<Board> randomMove(Board& game); //RandomMove 
 
 #endif // ALGS_H

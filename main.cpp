@@ -23,7 +23,7 @@ int main(){
 
 
     try {
-        std::vector<Board> path = greedy_search(board);
+        std::vector<Board> path = randomMove(board);
         std::cout << "Path found with " << path.size() << " moves." << std::endl;
         for (auto& board : path) {
             board.print_board();
