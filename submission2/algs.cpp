@@ -10,21 +10,6 @@
 #include <unordered_map>
 #include "algs.h"
 
-
-struct BoardHash {
-    std::size_t operator()(const Board& board) const {
-        std::size_t hash = 0;
-        for (const auto& row : board.board) {
-            for (int cell : row) {
-                hash ^= std::hash<int>()(cell) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-            }
-        }
-        return hash;
-    }
-};
-
-
-
 // Heuristic: Prefer states with fewer `2`s
 int heuristic(const std::vector<std::vector<int>>& board) {
     int empty_count = 0;
@@ -48,7 +33,6 @@ int heuristic(const std::vector<std::vector<int>>& board) {
 
 // Generate new possible board states
 std::vector<std::pair<Board, int>> get_successors(Board& game) {
-    std::vector<Board> successors;
     std::vector<std::pair<Board, int>> successors_direction;
     for (int direction = 0; direction < 4; ++direction) {
         Board newBoard = game; // Copy the current board
@@ -60,23 +44,15 @@ std::vector<std::pair<Board, int>> get_successors(Board& game) {
     }
     return successors_direction;
 }
-Board find_parent(const std::vector<std::pair<Board, Board>>& parent_list, const Board& child) {
-    for (const auto& pair : parent_list) {
-        if (pair.first == child) {
-            return pair.second;
-        }
-    }
-    throw std::runtime_error("Parent not found");
-}
 
 // Greedy Best-First Search
 std::vector<std::pair<Board, int>> greedy_search(Board& game) {
 
     int moves = 0;
     std::queue<Board> queue;
-    std::vector<std::tuple<Board, Board, int>> parent_list; // Track child, parent, and move
-    std::unordered_set<Board, BoardHash> visited; // Track visited boards
-    parent_list.push_back({game, game, -1}); // Initialize with the starting board
+    std::map<Board, std::pair<Board, int>> parent_list; // Track child, parent, and move
+    std::set<Board> visited; // Track visited boards
+    parent_list[game]={game, -1}; // Initialize with the starting board
     visited.insert(game); // Mark the initial board as visited
     queue.push(game);
     
@@ -92,15 +68,13 @@ std::vector<std::pair<Board, int>> greedy_search(Board& game) {
             while (true) {
 
                 // Find the parent and the move that led to this board
-                auto it = std::find_if(parent_list.begin(), parent_list.end(),
-                                       [&temp](const std::tuple<Board, Board, int>& entry) {
-                                           return std::get<0>(entry) == temp; // Match the child board
-                                       });
+
+                auto it = parent_list.find(temp);
                 if (it == parent_list.end()) {
                     throw std::runtime_error("Parent not found");
                 }
-                Board parent = std::get<1>(*it);
-                int move = std::get<2>(*it);
+
+                auto& [parent, move] = it->second;
                 path.push_back({temp, move}); // Add the current board to the path
                 if (temp == game) break; // Stop when we reach the starting board
                 temp = parent; // Backtrack to find the parent
@@ -125,7 +99,7 @@ std::vector<std::pair<Board, int>> greedy_search(Board& game) {
         // Add the successors to the queue
         for (const auto& successor : successors) {
             if (visited.find(successor.first) == visited.end()) { // Check if not visited
-                parent_list.push_back({successor.first, current, successor.second}); // Track the parent of this successor
+                parent_list[successor.first]= {current, successor.second}; // Track the parent of this successor
                 visited.insert(successor.first); // Mark as visited
             }
         }
@@ -137,15 +111,24 @@ std::vector<std::pair<Board, int>> greedy_search(Board& game) {
     }
     return {};
 }
+
 // randomMove Search
 std::vector<std::pair<Board, int>> randomMove(Board& game) {
     std::vector<std::pair<Board, int>> path;
     try {
-        while (true) {
+        int moves=0;
+        while (moves<=1000) {
             int direction = rand() % 4; // Random direction: 0 (LEFT), 1 (RIGHT), 2 (UP), 3 (DOWN)
             game.move(direction);
             path.push_back({game, direction}); // Add the current board state and move to the path
+            if(game.checkIfWin())
+            {
+                return path;
+            }
+            moves++;
         }
+        if(moves==1000) return path;
+
     } catch (const std::runtime_error& e) {
         if (std::string(e.what()) == "Game Over") {
             // Game over, return the path generated so far
