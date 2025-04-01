@@ -159,22 +159,28 @@ int main() {
             try {
                 alg_2 = Alg_2(board2);
                 size2 = alg_2.size();
-            } catch (const std::runtime_error& e) {
-                if (e.what() == std::string("You Win!")) {
-                    error2 = "Alg_2 wins?";
-                } else if (e.what() == std::string("Maximum moves reached_alg2")) {
+                error2="Alg_2: Board is full"; // safe to assume it returned because it was full
+
+                if(alg_2.back().first.checkIfWin()){
+                    if(size2<size1){
+                        error2 = ""; // set no error
+                    }
+                } // check if returned on a win
+
+                if(alg_2.size()==1000){
                     error2 = "Alg_2: 1000 moves";
-                } else if (e.what() == std::string("Game Over")) {
-                    size2 = alg_2.size();
-                    error2 = "Alg_2: Board is full";
-                }
+                } // check if returned with a path of 1000
+
+
+            } catch (const std::runtime_error& e) {
+                    error2 = e.what(); // exceptions
             }
 
             outputFile << "===================================================================================================" << std::endl;
             outputFile << "Game " << gameCount << ": " << "reverse " << type << " (" << size << " x " << size << " )";
 
-            // Only print the initial board if at least one algorithm solves the game (algo_2 is only ever an error if its a win)
-            if (error1.empty() && error2.empty()) {
+            // Only print the initial board if at least one algorithm solves the game (error2 empty if its a win)
+            if (error1.empty() || error2.empty()) {
                 outputFile << " - Initial Board" << std::endl;
                 outputFile << "---------------------------------------------------------------------------------------------------" << std::endl;
                 for (int i = 0; i < board.board.size(); i++) {
@@ -192,7 +198,8 @@ int main() {
             }
 
             printingMoves(alg_1, alg_2, outputFile);
-            if (error2=="Alg_2 wins?" && size2 < size1) {
+
+            if (error2=="" && size2 < size1) {
                 outputFile << "Winner: Alg_2, total moves: "<<size2 << std::endl;
             }
             else if (error1 == "Alg_1: Board is full" && error2 == "Alg_2: Board is full") {
@@ -206,15 +213,15 @@ int main() {
                 if (!alg_2.empty() && alg_2.back().first.checkIfWin() && size2 < size1) {
                     outputFile << "Winner: Alg_2, total moves: " << size2 << "("<< error1<<")" << std::endl;
                 } else {
-                    outputFile << ", draw ("<< error1<< "| "<< (!error2.empty() ? error2 : "Alg_2: Board is full") <<") " << std::endl;
+                    outputFile << ", draw ("<< error1<< "| "<< (!error2.empty() ? error2 : "Alg_2: error2 empty") <<") " << std::endl;
                 }
             }  else {
                 if (size1 < size2 && alg_1[alg_1.size() - 1].first.checkIfWin()) {
-                    outputFile << "Winner: Alg_1, total moves: " << size1-1  <<" ("<<(!error2.empty() ? error2 : "Alg_2: Board is full") <<")"<< std::endl;
+                    outputFile << "Winner: Alg_1, total moves: " << size1-1  <<" ("<<(!error2.empty() ? error2 : "Alg_2: error2 empty") <<")"<< std::endl;
                 } else if (size2 < size1 && alg_2[alg_2.size() - 1].first.checkIfWin()) {
                     outputFile << "Winner: Alg_2, total moves: " << size2 << std::endl;
                 } else {
-                    outputFile << "Winner: Alg_1, total moves: " << size1-1 <<" ("<<(!error2.empty() ? error2 : "Alg_2: Board is full") <<") "<< std::endl;
+                    outputFile << "Winner: Alg_1, total moves: " << size1-1 <<" ("<<(!error2.empty() ? error2 : "Alg_2: error2 empty") <<") "<< std::endl;
                 }
             }
 
